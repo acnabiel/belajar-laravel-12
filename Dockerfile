@@ -4,38 +4,36 @@ FROM php:8.2-cli
 RUN apt-get update && apt-get install -y \
     git unzip zip curl \
     libpng-dev libonig-dev libxml2-dev \
-    nodejs npm \
     && docker-php-ext-install \
     pdo_mysql mbstring exif pcntl bcmath gd
 
-# 2. Working directory
+# 🔧 Tambahkan ini
+RUN echo "upload_max_filesize=100M" >> /usr/local/etc/php/conf.d/uploads.ini \
+ && echo "post_max_size=100M" >> /usr/local/etc/php/conf.d/uploads.ini \
+ && echo "max_execution_time=300" >> /usr/local/etc/php/conf.d/uploads.ini \
+ && echo "max_input_time=300" >> /usr/local/etc/php/conf.d/uploads.ini
+
+# 2. Node.js 20
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
+
 WORKDIR /app
 
-# 3. Copy source
 COPY . .
 
-# 4. Install Composer
+# 3. Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
-# 5. Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# 6. Install frontend dependencies
-RUN npm install
+# 4. Build frontend
+RUN rm -rf node_modules package-lock.json \
+    && npm install \
+    && npm run build
 
-# 7. Build Vite
-RUN npm run build
+# 5. Permissions
+RUN chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
 
-# 8. Laravel cache
-RUN php artisan config:cache || true
-RUN php artisan route:cache || true
-RUN php artisan view:cache || true
-
-# 9. Permissions
-RUN chmod -R 775 storage bootstrap/cache || true
-
-# 10. Railway port
 EXPOSE 8080
 
-# 11. Start server
-CMD php artisan serve --host=0.0.0.0 --port=${PORT:-8080}
+CMD ["sh", "-c", "php artisan serve --host=0.0.0.0 --port=${PORT:-8080}"]
