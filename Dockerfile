@@ -22,7 +22,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader
 
 # # 6. Frontend build
-# RUN npm install && npm run build
+RUN npm install && npm run build
 
 # 7. Permissions
 RUN chown -R www-data:www-data storage bootstrap/cache \
