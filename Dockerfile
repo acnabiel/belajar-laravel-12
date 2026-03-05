@@ -27,7 +27,7 @@ RUN npm install && npm run build
 # 7. Permissions
 RUN chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
-
+ 
 # 8. Railway PORT
 EXPOSE 8080
   
