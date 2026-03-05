@@ -36,4 +36,6 @@ RUN chown -R www-data:www-data storage bootstrap/cache \
 
 EXPOSE 8080
 
+RUN php artisan key:generate || true
+
 CMD ["sh", "-c", "php artisan serve --host=0.0.0.0 --port=${PORT:-8080}"]
