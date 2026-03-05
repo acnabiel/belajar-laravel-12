@@ -30,6 +30,6 @@ RUN chown -R www-data:www-data storage bootstrap/cache \
 
 # 8. Railway PORT
 EXPOSE 8080
-
+ 
 # 9. Default command (akan dipakai kalau Start Command kosong)
 CMD ["sh", "-c", "php artisan serve --host=0.0.0.0 --port=${PORT:-8080}"]
