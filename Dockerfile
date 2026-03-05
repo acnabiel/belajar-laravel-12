@@ -7,35 +7,29 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install \
     pdo_mysql mbstring exif pcntl bcmath gd
 
-# 🔧 Tambahkan ini
-RUN echo "upload_max_filesize=100M" >> /usr/local/etc/php/conf.d/uploads.ini \
- && echo "post_max_size=100M" >> /usr/local/etc/php/conf.d/uploads.ini \
- && echo "max_execution_time=300" >> /usr/local/etc/php/conf.d/uploads.ini \
- && echo "max_input_time=300" >> /usr/local/etc/php/conf.d/uploads.ini
-
-# 2. Node.js 20
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+# 2. Node.js
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs
 
+# 3. Working directory
 WORKDIR /app
 
+# 4. Copy source
 COPY . .
 
-# 3. Composer
+# 5. Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader
 
-# 4. Build frontend
-RUN rm -rf node_modules package-lock.json \
-    && npm install \
-    && npm run build
+# # 6. Frontend build
+# RUN npm install && npm run build
 
-# 5. Permissions
+# 7. Permissions
 RUN chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
+# 8. Railway PORT
 EXPOSE 8080
 
-RUN php artisan key:generate || true
-
+# 9. Default command (akan dipakai kalau Start Command kosong)
 CMD ["sh", "-c", "php artisan serve --host=0.0.0.0 --port=${PORT:-8080}"]
