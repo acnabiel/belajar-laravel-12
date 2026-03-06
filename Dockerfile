@@ -16,7 +16,7 @@ WORKDIR /app
 
 # 4. Copy source
 COPY . .
-
+  
 # 5. Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader
